@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+
+<html>
+    <style>
+        body {
+            font-family: "Benton Sans", "Helvetica Neue", helvetica, arial, sans-serif;
+            margin: 2em;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+        .box{
+            /* border: 3px solid #666;
+            background-color: #ddd;
+            border-radius: .5em;
+            padding: 10px; */
+            cursor: move;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .image {
+            border: 3px solid #666;
+            background-color: #ddd;
+            border-radius: .5em;
+            padding: 10px;
+            cursor: move;
+        }
+        
+        .image.over {
+            border: 3px dotted #666;
+        }
+        .query {
+            color: #ff0000;
+            text-align: center;
+            font-size: 10;
+            font-style: italic;
+        }
+        .saveBtn{
+            font-size: 20px;
+            position: inherit;
+        }      
+        h1 {
+            color: #0015f7;
+            text-align: center;
+            font-size: 30;
+            font-style: italic;
+        }
+        [draggable] {
+            user-select: none;
+        }
+    </style>
+
+    <head>
+        <h1>AIC 2022 - UTEAI_Shimmerscale</h1>
+        <meta charset="utf-8">
+        <base href=".">
+        <!-- <script type="module" src="scripts/require.js"></script> -->
+    </head>
+    <body>
+        <div class="query" id="{{name}}" >{{name}}</div>
+        <button onclick="Done()" class="saveBtn">SUBMIT</button>
+        
+        <div class="container">
+            {% for i in range(len) %}
+            <div class='box'>
+                <img name="{{dic['video_name'][i]}}" id = "{{dic['frame_name'][i]}}" src= "{{ url_for('static', filename=dic['paths'][i])}}"  width="250" height="250" draggable="true" 
+                class="image">
+            </div>
+            {% endfor %}
+        </div>
+        
+
+    </body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>    
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+    var dragSrcEl = null;
+    function handleDragStart(e) {
+    // this.style.opacity = '0.4';
+    
+    dragSrcEl = this;
+
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+    }
+
+    function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+
+    e.dataTransfer.dropEffect = 'move';
+    
+    return false;
+    }
+
+    function handleDragEnter(e) {
+    this.classList.add('over');
+    }
+
+    function handleDragLeave(e) {
+    this.classList.remove('over');
+    }
+
+    function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation(); // stops the browser from redirecting.
+    }
+    
+    if (dragSrcEl != this) {
+        dragSrcEl.innerHTML = this.innerHTML;
+        this.innerHTML = e.dataTransfer.getData('text/html');
+    }
+    
+    return false;
+    }
+
+    function handleDragEnd(e) {
+    this.style.opacity = '1';
+    
+    
+    items.forEach(function (item) {
+        item.classList.remove('over');
+    });
+    }
+
+    let items = document.querySelectorAll('.container .box');
+    items.forEach(function(item) {
+        
+        item.addEventListener('dragstart', handleDragStart, false);
+        item.addEventListener('dragenter', handleDragEnter, false);
+        item.addEventListener('dragover', handleDragOver, false);
+        item.addEventListener('dragleave', handleDragLeave, false);
+        item.addEventListener('drop', handleDrop, false);
+        item.addEventListener('dragend', handleDragEnd, false);
+        // console.log(item.firstElementChild.id)
+
+    });
+    // console.log(imgs)
+    });
+    const imgs = [];
+    const testtttt = [];
+    let jsonString
+    i = 0
+    // const fs = require('fs');
+
+    function Done(){
+        const imgs = [];
+        const names = [];
+        const rowArray = [];
+        i++
+        let items = document.querySelectorAll('.container .box');
+        let query = document.getElementsByClassName('query')[0].id;
+        // console.log(query)
+        // console.log(items)
+        // console.log(items)
+
+        items.forEach(function(item) {
+            imgs.push(item.firstElementChild.id);
+            names.push(item.firstElementChild.name)
+        });
+        // console.log(imgs)
+        // console.log(names)
+        //var jsonString = JSON.stringify(imgs);
+        //var jsonString1 = JSON.stringify(names);
+        // console.log(jsonString)
+
+        const myJSON = [names, imgs];
+
+        output = myJSON[0].map((_, colIndex) => myJSON.map(row => row[colIndex]));
+        
+        // const myJSON = JSON.stringify([names, imgs]);
+        // console.log(myJSON)
+        let csvContent = "data:text/csv;charset=utf-8,";
+        j = 0
+        output.forEach(function(rowArray) {
+            
+            if(j < 100){
+                let row = rowArray.join(",");
+                csvContent += row +"\r\n";
+                j += 1;
+            }
+        });
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", query);
+        document.body.appendChild(link); // Required for FF
+
+        link.click(); // This will download the data file named "my_data.csv".
+
+
+        // download(jsonString, 'json.txt', 'text/plain');
+
+        // var myFile = new File([jsonString], "demo.txt", {type: "text/plain;charset=utf-8"});
+        // saveAs(myFile);
+
+        //-------------test-------------
+        // const blob = new Blob([data], { type: 'text/csv' });
+
+
+        //------------------------------
+        // location.reload();
+    }
+
+    
+</script>
+
+
+</html>
